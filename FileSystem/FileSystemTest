@@ -1,0 +1,114 @@
+/*Desenvolvido por Juliana Apgaua Sant'Ana Vidigal
+22.09.23
+*/
+
+#include "filesystem.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <locale.h>
+
+int main() {
+    setlocale(LC_ALL, "");
+    int fileID = -1; // ID do arquivo aberto
+
+    while (1) {
+        printf("\nSelecione uma operacao:\n");
+        printf("1. Abrir arquivo\n");
+        printf("2. Escrever no arquivo\n");
+        printf("3. Ler do arquivo\n");
+        printf("4. Fechar arquivo\n");
+        printf("0. Sair\n");
+        printf("Opcao: ");
+
+        int opcao;
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1: {
+                if (fileID == -1) {
+                    printf("Digite o nome do arquivo a ser aberto: ");
+                    char nomeArquivo[TAMANHO_NOME];
+                    scanf("%s", nomeArquivo);
+
+                    fileID = abrir(nomeArquivo);
+
+                    if (fileID != ERRO) {
+                        printf("Arquivo aberto com sucesso. ID: %d\n", fileID);
+                    } else {
+                        printf("Erro ao abrir o arquivo.\n");
+                    }
+                } else {
+                    printf("Um arquivo ja esta aberto. Feche-o primeiro.\n");
+                }
+                break;
+            }
+            case 2: {
+                if (fileID != -1) {
+                    printf("Digite o texto a ser escrito no arquivo: ");
+                    char texto[256];
+                    scanf(" %[^\n]", texto);
+
+                    int bytesEscritos = escrever(fileID, texto, sizeof(char), strlen(texto));
+
+                    if (bytesEscritos != ERRO) {
+                        printf("Escritos %d bytes no arquivo.\n", bytesEscritos);
+                    } else {
+                        printf("Erro ao escrever no arquivo.\n");
+                    }
+                } else {
+                    printf("Nenhum arquivo aberto. Abra um arquivo primeiro.\n");
+                }
+                break;
+            }
+            case 3: {
+                if (fileID != -1) {
+                    printf("Digite o numero de bytes a serem lidos: ");
+                    unsigned quantidade;
+                    scanf("%u", &quantidade);
+
+                    void* conteudoLido = ler(fileID, sizeof(char), quantidade);
+
+                    if (conteudoLido != NULL) {
+                        // Imprime o conteúdo como uma string em linguagem natural
+                        printf("Conteudo lido do arquivo: %s\n", (char*)conteudoLido);
+                        free(conteudoLido);
+                    } else {
+                        printf("Erro ao ler o arquivo.\n");
+                    }
+                } else {
+                    printf("Nenhum arquivo aberto. Abra um arquivo primeiro.\n");
+                }
+                break;
+            }
+            case 4: {
+                if (fileID != -1) {
+                    int fechou = fechar(fileID);
+                    if (fechou == 1) {
+                        printf("Arquivo fechado com sucesso.\n");
+                    } else {
+                        printf("Erro ao fechar o arquivo.\n");
+                    }
+                    fileID = -1; // Define o ID de arquivo para -1 para indicar que nenhum arquivo está aberto.
+                } else {
+                    printf("Nenhum arquivo aberto. Abra um arquivo primeiro.\n");
+                }
+                break;
+            }
+            case 0: {
+                // Encerra o programa
+                if (fileID != -1) {
+                    fechar(fileID); // Fecha o arquivo antes de sair
+                }
+                printf("Saindo do programa.\n");
+                return 0;
+            }
+            default: {
+                printf("Opcao invalida. Tente novamente.\n");
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
